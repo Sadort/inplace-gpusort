@@ -193,7 +193,7 @@ __global__ void swapAllRev(T* data, int N, int dist) {
 }
 
 template<typename T,fptr_t f>
-void bitonicSort(T* data, int N, int BLOCKS, int THREADS) {
+void bitonicSort(T* data, int N, int BLOCKS, int THREADS, cudaStream_t stream=0) {
 
   int baseBlocks=((N/M)/(THREADS/W));
   int roundDist=1;
@@ -201,27 +201,23 @@ void bitonicSort(T* data, int N, int BLOCKS, int THREADS) {
 
 // baseBlocks = 16384;
 // Sort the base case into blocks of 1024 elements each
-  squareSort<T,f><<<baseBlocks,32>>>(data, N);
-  cudaDeviceSynchronize();
+  squareSort<T,f><<<baseBlocks,32,0,stream>>>(data, N);
 
   int levels = (int)log2((float)(N/M)+1)+1;
 //  int levels = 19;
 //  printf("levels:%d\n", levels);
   for(int i=1; i<levels; i++) {
 	  
-    swapAllRev<T,f><<<BLOCKS,THREADS>>>(data,N,roundDist);
+    swapAllRev<T,f><<<BLOCKS,THREADS,0,stream>>>(data,N,roundDist);
 //    swapAllRevRegs<T,f><<<BLOCKS,THREADS>>>(data,N,roundDist);
-    cudaDeviceSynchronize();
     subDist = roundDist/2;
     for(int j=i-1; j>0; j--) {	
 //      swapAllBlock<T,f><<<BLOCKS,THREADS>>>(data,N,subDist);
-      swapAll<T,f><<<BLOCKS,THREADS>>>(data,N,subDist);
-      cudaDeviceSynchronize();
+      swapAll<T,f><<<BLOCKS,THREADS,0,stream>>>(data,N,subDist);
       subDist /=2;
     }
 
-    squareSort<T,f><<<BLOCKS,32>>>(data, N);
-    cudaDeviceSynchronize();
+    squareSort<T,f><<<BLOCKS,32,0,stream>>>(data, N);
     roundDist *=2;
   }
 
@@ -253,6 +249,4 @@ void bitonicSort(T* data, int N, int BLOCKS, int THREADS) {
   }
 */
 //  bitonicKernel<T,f><<<baseBlocks,THREADS>>>(data, N);
-
-  cudaDeviceSynchronize();
 }
