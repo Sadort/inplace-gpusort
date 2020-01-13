@@ -28,7 +28,7 @@ __forceinline__ __device__ void bitonicMergeCol(int* regs, int alt) {
     down = (threadIdx.x < (threadIdx.x ^ dist));
     for(int i=0; i<ELTS; i++) {
       val=regs[i];
-      temp = __shfl_xor(val, dist, W);
+      temp = __shfl_xor_sync(0xffffffff, val, dist, W);
       if(down)
         regs[i] = min(val, temp);
       else
@@ -51,7 +51,7 @@ __forceinline__ __device__ void bitonicSortCol(int* regs, int alt) {
       down = (threadIdx.x < (threadIdx.x ^ dist));
       for(int i=0; i<ELTS; i++) {
         val=regs[i];
-        temp = __shfl_xor(val, dist, W);
+        temp = __shfl_xor_sync(0xffffffff, val, dist, W);
         if(down^dir)
           regs[i] = min(val, temp);
         else

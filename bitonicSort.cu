@@ -33,7 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include"buildData.h"
 //#include"basecase/squareSort.hxx"
 
-//#define DEBUG 1
+#define DEBUG 1
 
 //#define TYPE long int
 

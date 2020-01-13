@@ -147,12 +147,12 @@ __global__ void swapAll(T* data, int N, int dist) {
   int globalId = threadIdx.x + blockIdx.x*blockDim.x;
 //int i=0;
   for(int i=0; i<N; i+=M*dist*2) {
-//    for(int j=globalId*ILP; j<M*dist; j+=gridDim.x*blockDim.x*ILP) {
-    int j=globalId;
-    if(j < M*dist)
+    for(int j=globalId*ILP; j<M*dist; j+=gridDim.x*blockDim.x*ILP) {
+//    int j=globalId;
+//    if(j < M*dist)
       cmpSwap<T,f>(data, i+j, M*dist+i+j);
     }
-//  }
+  }
 }
 
 template<typename T, fptr_t f>
@@ -220,8 +220,8 @@ void bitonicSort(T* data, int N, int BLOCKS, int THREADS) {
       subDist /=2;
     }
 
-//    squareSort<T,f><<<BLOCKS,32>>>(data, N);
-//    cudaDeviceSynchronize();
+    squareSort<T,f><<<BLOCKS,32>>>(data, N);
+    cudaDeviceSynchronize();
     roundDist *=2;
   }
 
